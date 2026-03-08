@@ -41,10 +41,10 @@ const Portfolio = () => {
                 if (currentUser) {
                     const token = await currentUser.getIdToken();
                     const [profileRes, activityRes] = await Promise.all([
-                        fetch('http://localhost:5000/api/user/profile', {
+                        fetch(`${import.meta.env.VITE_API_URL}/api/user/profile`, {
                             headers: { 'Authorization': `Bearer ${token}` }
                         }),
-                        fetch('http://localhost:5000/api/user/activity', {
+                        fetch(`${import.meta.env.VITE_API_URL}/api/user/activity`, {
                             headers: { 'Authorization': `Bearer ${token}` }
                         })
                     ]);
@@ -114,7 +114,7 @@ const Portfolio = () => {
         setSaving(true);
         try {
             const token = await currentUser.getIdToken();
-            const res = await fetch('http://localhost:5000/api/user/profile/update', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/user/profile/update`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

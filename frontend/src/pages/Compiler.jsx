@@ -81,7 +81,7 @@ const Compiler = () => {
         setIsError(false);
 
         try {
-            const res = await fetch('http://localhost:5000/api/compiler/execute', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/compiler/execute`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ language, code, stdin }),

@@ -20,10 +20,10 @@ const Header = () => {
             try {
                 const token = await currentUser.getIdToken();
                 const [profileRes, streakRes] = await Promise.all([
-                    fetch('http://localhost:5000/api/user/profile', {
+                    fetch(`${import.meta.env.VITE_API_URL}/api/user/profile`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     }),
-                    fetch('http://localhost:5000/api/streak/status', {
+                    fetch(`${import.meta.env.VITE_API_URL}/api/streak/status`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     })
                 ]);
@@ -43,7 +43,7 @@ const Header = () => {
                 setUserStats({ xp, streak });
 
                 // Also update streak on page load (triggers daily streak logic)
-                fetch('http://localhost:5000/api/streak/update', {
+                fetch(`${import.meta.env.VITE_API_URL}/api/streak/update`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 }).catch(() => { });

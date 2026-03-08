@@ -31,7 +31,7 @@ const Study = () => {
             if (!currentUser) return;
             try {
                 const token = await currentUser.getIdToken();
-                const res = await fetch('http://localhost:5000/api/user/profile', {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/user/profile`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -51,7 +51,7 @@ const Study = () => {
         setLoadingMap(prev => ({ ...prev, [roadmapName]: true }));
         try {
             const token = await currentUser.getIdToken();
-            const res = await fetch('http://localhost:5000/api/user/roadmap/toggle', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/user/roadmap/toggle`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

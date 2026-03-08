@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
             if (!firebaseUser) return;
             const token = await firebaseUser.getIdToken();
             // Wait for backend to be ready, this will create or update the user in Postgres
-            await fetch('http://localhost:5000/api/auth/sync', {
+            await fetch(`${import.meta.env.VITE_API_URL}/api/auth/sync`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

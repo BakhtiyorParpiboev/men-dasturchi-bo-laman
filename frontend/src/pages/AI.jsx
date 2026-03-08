@@ -57,7 +57,7 @@ const AI = () => {
     const fetchChats = async () => {
         try {
             const headers = await getAuthHeaders();
-            const res = await fetch('http://localhost:5000/api/ai/chats', { headers });
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ai/chats`, { headers });
             if (res.ok) {
                 const data = await res.json();
                 setChats(data);
@@ -77,7 +77,7 @@ const AI = () => {
 
         try {
             const headers = await getAuthHeaders();
-            const res = await fetch(`http://localhost:5000/api/ai/chats/${chat.id}`, { headers });
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ai/chats/${chat.id}`, { headers });
             if (res.ok) {
                 const data = await res.json();
                 setMessages(data.messages || []);
@@ -90,7 +90,7 @@ const AI = () => {
     const createNewChat = async () => {
         try {
             const headers = await getAuthHeaders();
-            const res = await fetch('http://localhost:5000/api/ai/chats', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ai/chats`, {
                 method: 'POST',
                 headers,
                 body: JSON.stringify({ model })
@@ -113,7 +113,7 @@ const AI = () => {
 
         try {
             const headers = await getAuthHeaders();
-            const res = await fetch(`http://localhost:5000/api/ai/chats/${chatId}`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ai/chats/${chatId}`, {
                 method: 'DELETE',
                 headers
             });
@@ -137,7 +137,7 @@ const AI = () => {
         if (!activeChat) {
             try {
                 const headers = await getAuthHeaders();
-                const res = await fetch('http://localhost:5000/api/ai/chats', {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ai/chats`, {
                     method: 'POST',
                     headers,
                     body: JSON.stringify({ model })
@@ -168,7 +168,7 @@ const AI = () => {
 
         try {
             const headers = await getAuthHeaders();
-            const res = await fetch(`http://localhost:5000/api/ai/chats/${activeChat.id}/messages`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ai/chats/${activeChat.id}/messages`, {
                 method: 'POST',
                 headers,
                 body: JSON.stringify({ content: messageText })
