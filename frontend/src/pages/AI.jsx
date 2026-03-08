@@ -2,9 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
     MessageSquare, Plus, Send, Paperclip,
-    Trash2, Menu, X, Bot, User, Loader2
+    Trash2, Menu, X, Bot, User, Loader2,
+    Sparkles, Code, Lightbulb, BookOpen, ChevronDown
 } from 'lucide-react';
 import './AI.css';
+
+const SUGGESTIONS = [
+    { icon: <Code size={16} />, text: "Python asoslari haqida tushuntir" },
+    { icon: <Lightbulb size={16} />, text: "JavaScript - HTML - CSS farqi nima?" },
+    { icon: <BookOpen size={16} />, text: "React nima va qanday ishlaydi?" },
+    { icon: <Sparkles size={16} />, text: "Birinchi loyiha yasashni o'rgat" },
+];
 
 const AI = () => {
     const { currentUser } = useAuth();
@@ -12,7 +20,7 @@ const AI = () => {
     const [currentChat, setCurrentChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
-    const [model, setModel] = useState('gpt-4');
+    const [model, setModel] = useState('gemini-2.5-pro');
     const [isLoading, setIsLoading] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -21,7 +29,7 @@ const AI = () => {
     const textareaRef = useRef(null);
     const fileInputRef = useRef(null);
 
-    // Auto-scroll to bottom when messages change
+    // Auto-scroll to bottom
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
@@ -53,7 +61,6 @@ const AI = () => {
             if (res.ok) {
                 const data = await res.json();
                 setChats(data);
-                // If there are chats, auto-select the most recent one
                 if (data.length > 0 && !currentChat) {
                     selectChat(data[0]);
                 }
@@ -66,7 +73,7 @@ const AI = () => {
     const selectChat = async (chat) => {
         setCurrentChat(chat);
         setModel(chat.model);
-        if (window.innerWidth <= 768) setIsSidebarOpen(false); // close sidebar on mobile
+        if (window.innerWidth <= 768) setIsSidebarOpen(false);
 
         try {
             const headers = await getAuthHeaders();
@@ -101,7 +108,7 @@ const AI = () => {
     };
 
     const deleteChat = async (e, chatId) => {
-        e.stopPropagation(); // prevent selectChat running
+        e.stopPropagation();
         if (!window.confirm("Bu chatni o'chirmoqchimisiz?")) return;
 
         try {
@@ -124,13 +131,10 @@ const AI = () => {
 
     const handleSend = async (e) => {
         e?.preventDefault();
-        console.log("handleSend START", { input, isLoading, currentChat });
         if (!input.trim() || isLoading) return;
 
-        // If no active chat, create one instantly first
         let activeChat = currentChat;
         if (!activeChat) {
-            console.log("No active chat, creating one...");
             try {
                 const headers = await getAuthHeaders();
                 const res = await fetch('http://localhost:5000/api/ai/chats', {
@@ -140,12 +144,10 @@ const AI = () => {
                 });
                 if (res.ok) {
                     activeChat = await res.json();
-                    console.log("Created active chat:", activeChat);
                     setChats([activeChat, ...chats]);
                     setCurrentChat(activeChat);
                 } else {
-                    console.error("Failed to create active chat via early return");
-                    return; // Stop if failed
+                    return;
                 }
             } catch (err) {
                 console.error("Failed to create init chat", err);
@@ -156,33 +158,24 @@ const AI = () => {
         const messageText = input;
         setInput('');
 
-        console.log("Pre-optimistic UI");
-        // Optimistic UI updates
         const tempUserMessage = { id: Date.now().toString(), role: 'user', content: messageText };
         setMessages(prev => [...prev, tempUserMessage]);
         setIsLoading(true);
 
-        console.log("Pre-textarea height reset");
-        // Reset textarea height
         if (textareaRef.current) {
             textareaRef.current.style.height = 'auto';
         }
 
-        console.log("Fetching /messages...", { activeChatId: activeChat.id });
         try {
             const headers = await getAuthHeaders();
-            console.log("Got headers for /messages");
             const res = await fetch(`http://localhost:5000/api/ai/chats/${activeChat.id}/messages`, {
                 method: 'POST',
                 headers,
                 body: JSON.stringify({ content: messageText })
             });
-            console.log("Fetch /messages returned:", res.status);
 
             if (res.ok) {
                 const data = await res.json();
-                console.log("Got /messages json:", data);
-                // Replace optimistic user message with actual, and append AI response
                 setMessages(prev => [
                     ...prev.filter(m => m.id !== tempUserMessage.id),
                     data.userMessage,
@@ -191,9 +184,7 @@ const AI = () => {
             }
         } catch (error) {
             console.error("Xabar jo'natishda xatolik:", error);
-            // Optionally remove optimistic message or show error state
         } finally {
-            console.log("Finally block hit");
             setIsLoading(false);
         }
     };
@@ -205,23 +196,32 @@ const AI = () => {
         }
     };
 
+    const handleSuggestionClick = (text) => {
+        setInput(text);
+        // Focus the textarea
+        textareaRef.current?.focus();
+    };
+
     // Auto-resize textarea
     useEffect(() => {
         if (textareaRef.current) {
             textareaRef.current.style.height = 'auto';
-            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 180)}px`;
         }
     }, [input]);
 
+    // Login prompt for unauthenticated users
     if (!currentUser) {
         return (
-            <div className="container py-20 text-center flex flex-col items-center justify-center min-h-[50vh]">
-                <Bot size={64} className="text-purple-500 mb-6" />
-                <h1 className="text-3xl font-bold mb-4">AI Yordamchi</h1>
-                <p className="text-[var(--text-secondary)] mb-6">Ushbu bo'limdan foydalanish uchun tizimga kiring.</p>
+            <div className="ai-login-prompt">
+                <div className="ai-login-icon">
+                    <Sparkles size={36} />
+                </div>
+                <h1>AI Yordamchi</h1>
+                <p>Dasturlash bo'yicha savollaringizga AI javob beradi. Tizimga kiring va boshlang!</p>
                 <button
                     onClick={() => window.location.href = '/login'}
-                    className="btn btn-primary"
+                    className="btn btn-primary btn-large"
                 >
                     Tizimga Kirish
                 </button>
@@ -229,25 +229,29 @@ const AI = () => {
         );
     }
 
+    const hasMessages = messages.length > 0;
+
     return (
-        <div className="ai-container">
-            {/* Overlay for mobile sidebar */}
+        <div className="ai-page">
+            {/* Mobile sidebar overlay */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
+                    className="ai-sidebar-overlay"
                     onClick={() => setIsSidebarOpen(false)}
+                    style={{ display: window.innerWidth <= 768 ? 'block' : 'none' }}
                 />
             )}
 
             {/* Sidebar */}
-            <div className={`ai-sidebar ${isSidebarOpen ? 'open' : 'closed'} z-30 md:relative absolute`}>
+            <div className={`ai-sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
                 <div className="ai-sidebar-header">
                     <button onClick={createNewChat} className="new-chat-btn">
-                        <Plus size={20} /> Yangi Chat
+                        <Plus size={18} /> Yangi Chat
                     </button>
                     <button
-                        className="md:hidden text-[var(--text-secondary)] p-2 hover:bg-gray-800 rounded-lg ml-2"
+                        className="sidebar-toggle-btn"
                         onClick={() => setIsSidebarOpen(false)}
+                        style={{ display: window.innerWidth <= 768 ? 'flex' : 'none' }}
                     >
                         <X size={20} />
                     </button>
@@ -255,7 +259,13 @@ const AI = () => {
 
                 <div className="chat-history-list">
                     {chats.length === 0 ? (
-                        <p className="text-center text-[var(--text-muted)] text-sm py-4">
+                        <p style={{
+                            textAlign: 'center',
+                            color: 'var(--text-secondary)',
+                            fontSize: '0.85rem',
+                            padding: '2rem 0',
+                            opacity: 0.6
+                        }}>
                             Hozircha chatlar yo'q
                         </p>
                     ) : (
@@ -265,15 +275,15 @@ const AI = () => {
                                 onClick={() => selectChat(chat)}
                                 className={`chat-history-item ${currentChat?.id === chat.id ? 'active' : ''}`}
                             >
-                                <div className="flex items-center gap-3 overflow-hidden">
-                                    <MessageSquare size={16} />
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', overflow: 'hidden' }}>
+                                    <MessageSquare size={15} />
                                     <span>{chat.title}</span>
                                 </div>
                                 <button
                                     onClick={(e) => deleteChat(e, chat.id)}
                                     className="delete-chat-btn"
                                 >
-                                    <Trash2 size={16} />
+                                    <Trash2 size={14} />
                                 </button>
                             </div>
                         ))
@@ -281,110 +291,159 @@ const AI = () => {
                 </div>
             </div>
 
-            {/* Main Chat Area */}
+            {/* Main Area */}
             <div className="ai-main">
-                <div className="ai-header">
+                {/* Top bar */}
+                <div className="ai-topbar">
                     <button
-                        className="menu-toggle-btn"
+                        className="sidebar-toggle-btn"
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                        title="Sidebar menyu"
+                        title="Sidebar"
                     >
-                        <Menu size={24} />
+                        <Menu size={20} />
                     </button>
-
-                    <div className="flex-1 flex justify-center md:justify-start md:ml-4">
-                        <select
-                            value={model}
-                            onChange={(e) => setModel(e.target.value)}
-                            className="model-selector"
-                            disabled={messages.length > 0} // lock model after conversation starts
-                        >
-                            <option value="gpt-4">ChatGPT (GPT-4)</option>
-                            <option value="claude-3">Claude 3 (Opus)</option>
-                            <option value="gemini-pro">Google Gemini Pro</option>
-                        </select>
+                    <div className="topbar-model-label">
+                        <Sparkles size={16} />
+                        Gemini
                     </div>
                 </div>
 
-                <div className={`ai-main-content ${messages.length === 0 ? 'empty-layout' : ''}`}>
-                    <div className="chat-messages">
-                        {!currentChat && messages.length === 0 ? (
-                            <div className="ai-empty-state">
-                                <div className="ai-empty-icon">
-                                    <Bot size={40} />
-                                </div>
-                                <h2 className="text-2xl font-bold mb-2">Qanday yordam bera olaman?</h2>
-                                <p>O'zingizni qiziqtirgan dasturlash savollarini bering yoki rasm yuklang.</p>
+                {/* Content */}
+                <div className="ai-content">
+                    {!hasMessages ? (
+                        /* Empty state */
+                        <div className="ai-empty-state">
+                            <h1 className="gemini-greeting">Salom, qanday yordam kerak?</h1>
+                            <p className="gemini-subtext">Dasturlash bo'yicha so'rang</p>
+
+                            <div className="suggestion-chips">
+                                {SUGGESTIONS.map((s, i) => (
+                                    <button
+                                        key={i}
+                                        className="suggestion-chip"
+                                        onClick={() => handleSuggestionClick(s.text)}
+                                    >
+                                        {s.icon}
+                                        {s.text}
+                                    </button>
+                                ))}
                             </div>
-                        ) : (
-                            <>
+                        </div>
+                    ) : (
+                        /* Messages */
+                        <div className="ai-messages">
+                            <div className="ai-messages-inner">
                                 {messages.map((msg, index) => (
-                                    <div key={msg.id || index} className={`message-wrapper ${msg.role}`}>
-                                        <div className="message-avatar">
-                                            {msg.role === 'user' ? <User size={20} /> : <Bot size={20} />}
+                                    <div key={msg.id || index} className={`msg-row ${msg.role}`}>
+                                        <div className="msg-avatar">
+                                            {msg.role === 'user' ? <User size={16} /> : <Sparkles size={16} />}
                                         </div>
-                                        <div className="message-bubble whitespace-pre-wrap">
+                                        <div className="msg-bubble">
                                             {msg.content}
                                         </div>
                                     </div>
                                 ))}
                                 {isLoading && (
-                                    <div className="message-wrapper assistant">
-                                        <div className="message-avatar">
-                                            <Bot size={20} />
+                                    <div className="msg-row assistant">
+                                        <div className="msg-avatar">
+                                            <Sparkles size={16} />
                                         </div>
-                                        <div className="message-bubble flex items-center gap-2 text-[var(--text-muted)]">
-                                            <Loader2 size={16} className="animate-spin" /> Yozmoqda...
+                                        <div className="typing-indicator">
+                                            <div className="typing-dots">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
                                 <div ref={messagesEndRef} />
-                            </>
-                        )}
-                    </div>
-
-                    <div className="chat-input-container">
-                        <div className="chat-input-wrapper">
-                            {selectedFile && (
-                                <div className="file-preview">
-                                    <Paperclip size={14} className="text-[var(--primary-color)]" />
-                                    <span className="truncate max-w-[150px]">{selectedFile.name}</span>
-                                    <button className="file-preview-remove" onClick={() => setSelectedFile(null)}>
-                                        <X size={14} />
-                                    </button>
-                                </div>
-                            )}
-                            <button className="file-btn" title="Fayl yoki Rasm yuklash" onClick={() => fileInputRef.current?.click()}>
-                                <Paperclip size={20} />
-                            </button>
-                            <input
-                                type="file"
-                                className="hidden hidden-file-input"
-                                style={{ display: 'none' }}
-                                ref={fileInputRef}
-                                onChange={(e) => setSelectedFile(e.target.files[0])}
-                            />
-                            <textarea
-                                ref={textareaRef}
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder={`${model} ga xabar yozing...`}
-                                className="chat-textarea"
-                                rows={1}
-                            />
-                            <button
-                                className="send-btn"
-                                onClick={handleSend}
-                                disabled={!input.trim() || isLoading}
-                            >
-                                <Send size={18} />
-                            </button>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
-                    <div className="ai-warning-text">
-                        AI ba'zan noaniq ma'lumotlar berishi mumkin. Muhim qarorlar qabul qilishdan oldin tekshiring.
+                    {/* Input area */}
+                    <div className="ai-input-area">
+                        <div className="gemini-input-outer">
+                            <div className="gemini-input-inner">
+                                {/* File preview */}
+                                {selectedFile && (
+                                    <div className="file-chip">
+                                        <Paperclip size={13} style={{ color: 'var(--accent-blue-500)' }} />
+                                        <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {selectedFile.name}
+                                        </span>
+                                        <button className="file-chip-remove" onClick={() => setSelectedFile(null)}>
+                                            <X size={13} />
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Textarea row */}
+                                <div className="gemini-textarea-row">
+                                    <textarea
+                                        ref={textareaRef}
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        onKeyDown={handleKeyDown}
+                                        placeholder="Ask anything, @ for context"
+                                        className="gemini-textarea"
+                                        rows={1}
+                                    />
+                                </div>
+
+                                {/* Controls row */}
+                                <div className="gemini-controls-row">
+                                    <div className="gemini-controls-left">
+                                        <button
+                                            className="gemini-add-btn"
+                                            title="Fayl yuklash"
+                                            onClick={() => fileInputRef.current?.click()}
+                                        >
+                                            <Plus size={18} />
+                                        </button>
+                                        <input
+                                            type="file"
+                                            className="hidden-file-input"
+                                            ref={fileInputRef}
+                                            onChange={(e) => setSelectedFile(e.target.files[0])}
+                                        />
+
+                                        <button className="gemini-chip" title="Planning mode">
+                                            <ChevronDown size={14} />
+                                            Planning
+                                        </button>
+
+                                        <select
+                                            value={model}
+                                            onChange={(e) => setModel(e.target.value)}
+                                            className="gemini-model-select"
+                                            disabled={messages.length > 0}
+                                            title="Model tanlash"
+                                        >
+                                            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                                            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="gemini-controls-right">
+                                        <button
+                                            className="gemini-send-btn"
+                                            onClick={handleSend}
+                                            disabled={!input.trim() || isLoading}
+                                            title="Jo'natish"
+                                        >
+                                            <Send size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p className="ai-disclaimer">
+                            AI ba'zan noaniq ma'lumotlar berishi mumkin. Muhim qarorlar qabul qilishdan oldin tekshiring.
+                        </p>
                     </div>
                 </div>
             </div>
