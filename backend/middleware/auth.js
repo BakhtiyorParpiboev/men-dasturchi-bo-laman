@@ -1,18 +1,20 @@
 const admin = require('firebase-admin');
 
-// IMPORTANT: In production, initialize admin with proper service account credentials
-try {
-  const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
-  if (serviceAccountPath) {
-    const serviceAccount = require(serviceAccountPath);
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-  } else {
-    admin.initializeApp();
+// Initialize Firebase Admin only once
+if (!admin.apps.length) {
+  try {
+    const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+    if (serviceAccountPath) {
+      const serviceAccount = require(serviceAccountPath);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+    } else {
+      admin.initializeApp();
+    }
+  } catch (error) {
+    console.log('Firebase admin initialization skipped or failed:', error.message);
   }
-} catch (error) {
-  console.log('Firebase admin initialization skipped or failed:', error.message);
 }
 
 const verifyToken = async (req, res, next) => {
