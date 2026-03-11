@@ -3,6 +3,7 @@ import {
     Gamepad2, BrainCircuit, PenTool, Search, Eye, ArrowUpDown, Trophy, Users,
     Zap, Star, Play, Lock, Flame, Target, Medal
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Games.css';
 
 import QuizGame from './games/QuizGame';
@@ -169,6 +170,7 @@ const ACHIEVEMENTS = [
 ];
 
 const Games = () => {
+    const { currentUser } = useAuth();
     const [activeCategory, setActiveCategory] = useState('all');
     const [activeGame, setActiveGame] = useState(null);
     const [totalXP, setTotalXP] = useState(0);
@@ -184,8 +186,24 @@ const Games = () => {
         setActiveGame(null);
     };
 
-    const handleXPEarned = (earnedXP) => {
+    const handleXPEarned = async (earnedXP) => {
         setTotalXP(prev => prev + earnedXP);
+        // Persist XP to backend
+        if (currentUser) {
+            try {
+                const token = await currentUser.getIdToken();
+                await fetch(`${import.meta.env.VITE_API_URL}/api/xp/add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ amount: earnedXP, source: 'games' })
+                });
+            } catch (error) {
+                console.error('Failed to persist XP:', error);
+            }
+        }
     };
 
     const renderGame = () => {
@@ -215,10 +233,10 @@ const Games = () => {
                 <div className="games-live-stats">
                     <div className="live-stat">
                         <div className="live-stat-dot"></div>
-                        <Gamepad2 size={14} /> <span>3,847 o'yin o'ynalgan</span>
+                        <Gamepad2 size={14} /> <span>3,847 o'yin o'ynalgan (Test)</span>
                     </div>
                     <div className="live-stat">
-                        <Users size={14} /> <span>524 faol o'yinchi</span>
+                        <Users size={14} /> <span>524 faol o'yinchi (Test)</span>
                     </div>
                     {totalXP > 0 && (
                         <div className="live-stat" style={{ borderColor: 'rgba(245,158,11,0.3)' }}>
@@ -298,7 +316,7 @@ const Games = () => {
             {/* Leaderboard Section */}
             <div className="games-leaderboard-section">
                 <div className="leaderboard-header">
-                    <h2><Trophy size={24} style={{ color: '#f59e0b' }} /> Top O'yinchilar</h2>
+                    <h2><Trophy size={24} style={{ color: '#f59e0b' }} /> Top O'yinchilar <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 400, marginLeft: '8px' }}>(Test ma'lumot)</span></h2>
                 </div>
                 <div className="leaderboard-card">
                     {LEADERBOARD.map(player => (

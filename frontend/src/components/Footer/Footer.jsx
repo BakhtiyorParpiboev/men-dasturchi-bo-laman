@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Github, Send, Linkedin, Mail, Code2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import './Footer.css';
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
+    const { currentUser } = useAuth();
 
     return (
         <footer className="footer">
@@ -42,10 +44,10 @@ const Footer = () => {
                     <div className="footer-section">
                         <h4 className="footer-heading">Manbalar</h4>
                         <ul className="footer-links">
-                            <li><Link to="/portfolio/demo">Portfolio</Link></li>
-                            <li><a href="#">Blog</a></li>
-                            <li><a href="#">Hamjamiyat</a></li>
-                            <li><a href="#">Yordam markazi</a></li>
+                            <li><Link to={currentUser ? `/portfolio/${currentUser.displayName || 'user'}` : '/login'}>Portfolio</Link></li>
+                            <li><Link to="/community">Blog</Link></li>
+                            <li><Link to="/community">Hamjamiyat</Link></li>
+                            <li><Link to="/community">Yordam markazi</Link></li>
                         </ul>
                     </div>
 
@@ -53,9 +55,9 @@ const Footer = () => {
                     <div className="footer-section">
                         <h4 className="footer-heading">Huquqiy</h4>
                         <ul className="footer-links">
-                            <li><a href="#">Maxfiylik siyosati</a></li>
-                            <li><a href="#">Foydalanish shartlari</a></li>
-                            <li><a href="#">Cookie siyosati</a></li>
+                            <li><span style={{ color: 'var(--text-secondary)', cursor: 'default' }}>Maxfiylik siyosati</span></li>
+                            <li><span style={{ color: 'var(--text-secondary)', cursor: 'default' }}>Foydalanish shartlari</span></li>
+                            <li><span style={{ color: 'var(--text-secondary)', cursor: 'default' }}>Cookie siyosati</span></li>
                         </ul>
                     </div>
                 </div>

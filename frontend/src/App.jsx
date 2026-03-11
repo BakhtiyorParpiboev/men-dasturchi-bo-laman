@@ -14,6 +14,7 @@ import Compiler from './pages/Compiler';
 import Portfolio from './pages/Portfolio';
 import Login from './pages/Login';
 import Community from './pages/Community';
+import NotFound from './pages/NotFound';
 
 function AppContent() {
   const location = useLocation();
@@ -32,6 +33,7 @@ function AppContent() {
           <Route path="/portfolio/:username" element={<Portfolio />} />
           <Route path="/login" element={<Login />} />
           <Route path="/community" element={<Community />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       {!hideFooterRoutes.includes(location.pathname) && <Footer />}
@@ -42,11 +44,11 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <Router>
+      <Router>
+        <AuthProvider>
           <AppContent />
-        </Router>
-      </AuthProvider>
+        </AuthProvider>
+      </Router>
     </ThemeProvider>
   );
 }

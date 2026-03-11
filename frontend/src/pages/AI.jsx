@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
     MessageSquare, Plus, Send, Paperclip,
@@ -16,6 +17,7 @@ const SUGGESTIONS = [
 
 const AI = () => {
     const { currentUser } = useAuth();
+    const navigate = useNavigate();
     const [chats, setChats] = useState([]);
     const [currentChat, setCurrentChat] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -23,11 +25,9 @@ const AI = () => {
     const [model, setModel] = useState('gemini-2.5-pro');
     const [isLoading, setIsLoading] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
-    const [selectedFile, setSelectedFile] = useState(null);
 
     const messagesEndRef = useRef(null);
     const textareaRef = useRef(null);
-    const fileInputRef = useRef(null);
 
     // Auto-scroll to bottom
     const scrollToBottom = () => {
@@ -220,7 +220,7 @@ const AI = () => {
                 <h1>AI Yordamchi</h1>
                 <p>Dasturlash bo'yicha savollaringizga AI javob beradi. Tizimga kiring va boshlang!</p>
                 <button
-                    onClick={() => window.location.href = '/login'}
+                    onClick={() => navigate('/login')}
                     className="btn btn-primary btn-large"
                 >
                     Tizimga Kirish
@@ -238,7 +238,6 @@ const AI = () => {
                 <div
                     className="ai-sidebar-overlay"
                     onClick={() => setIsSidebarOpen(false)}
-                    style={{ display: window.innerWidth <= 768 ? 'block' : 'none' }}
                 />
             )}
 
@@ -249,9 +248,8 @@ const AI = () => {
                         <Plus size={18} /> Yangi Chat
                     </button>
                     <button
-                        className="sidebar-toggle-btn"
+                        className="sidebar-toggle-btn sidebar-close-btn"
                         onClick={() => setIsSidebarOpen(false)}
-                        style={{ display: window.innerWidth <= 768 ? 'flex' : 'none' }}
                     >
                         <X size={20} />
                     </button>
@@ -366,20 +364,6 @@ const AI = () => {
                     <div className="ai-input-area">
                         <div className="gemini-input-outer">
                             <div className="gemini-input-inner">
-                                {/* File preview */}
-                                {selectedFile && (
-                                    <div className="file-chip">
-                                        <Paperclip size={13} style={{ color: 'var(--accent-blue-500)' }} />
-                                        <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                            {selectedFile.name}
-                                        </span>
-                                        <button className="file-chip-remove" onClick={() => setSelectedFile(null)}>
-                                            <X size={13} />
-                                        </button>
-                                    </div>
-                                )}
-
-                                {/* Textarea row */}
                                 <div className="gemini-textarea-row">
                                     <textarea
                                         ref={textareaRef}
@@ -395,20 +379,6 @@ const AI = () => {
                                 {/* Controls row */}
                                 <div className="gemini-controls-row">
                                     <div className="gemini-controls-left">
-                                        <button
-                                            className="gemini-add-btn"
-                                            title="Fayl yuklash"
-                                            onClick={() => fileInputRef.current?.click()}
-                                        >
-                                            <Plus size={18} />
-                                        </button>
-                                        <input
-                                            type="file"
-                                            className="hidden-file-input"
-                                            ref={fileInputRef}
-                                            onChange={(e) => setSelectedFile(e.target.files[0])}
-                                        />
-
                                         <button className="gemini-chip" title="Planning mode">
                                             <ChevronDown size={14} />
                                             Planning

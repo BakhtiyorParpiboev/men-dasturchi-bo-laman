@@ -12,6 +12,8 @@
   /* Blue Accents */
   --accent-blue-50: #eff6ff;
   --accent-blue-100: #dbeafe;
+  --accent-blue-300: #93c5fd;
+  --accent-blue-400: #60a5fa;
   --accent-blue-500: #3b82f6;
   --accent-blue-600: #2563eb;
   --accent-blue-700: #1d4ed8;
@@ -46,6 +48,8 @@
   /* Dark mode accent adjustments */
   --accent-blue-50: #172554;
   --accent-blue-100: #1e3a8a;
+  --accent-blue-300: #3b82f6;
+  --accent-blue-400: #60a5fa;
 }
 
 * {
@@ -108,7 +112,7 @@ button {
 /* Header */
 .header {
   height: 72px;
-  background: rgba(var(--bg-color), 0.8);
+  background-color: var(--bg-color);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-color);
   position: sticky;
@@ -365,6 +369,21 @@ button {
   object-fit: cover;
   border: 2px solid var(--accent-blue-500);
   cursor: pointer;
+}
+
+.logout-btn {
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+
+.logout-btn:hover {
+  color: var(--streak-color);
+  background-color: rgba(239, 68, 68, 0.1);
 }
 
 /* Main Layout */

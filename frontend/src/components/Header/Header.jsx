@@ -120,25 +120,25 @@ const Header = () => {
                         </div>
 
                         {!currentUser ? (
-                            <div className="flex gap-2 auth-buttons">
+                            <div className="auth-buttons" style={{ display: 'flex', gap: '0.5rem' }}>
                                 <Link to="/login" className="btn btn-outline" onClick={closeMobileMenu}>Sign In</Link>
                                 <Link to="/community" className="btn btn-primary" onClick={closeMobileMenu}>Join Us</Link>
                             </div>
                         ) : (
-                            <div className="profile-dropdown flex items-center gap-4 border-l border-[var(--border-color)] pl-4 profile-border">
-                                <Link to={`/portfolio/${currentUser.displayName || 'user'}`} onClick={closeMobileMenu} className="flex items-center gap-2">
+                            <div className="profile-dropdown profile-border" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '1px solid var(--border-color)', paddingLeft: '1rem' }}>
+                                <Link to={`/portfolio/${currentUser.displayName || 'user'}`} onClick={closeMobileMenu} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
                                     {currentUser.photoURL ? (
                                         <img src={currentUser.photoURL} alt="Profile" className="profile-avatar" />
                                     ) : (
-                                        <div className="profile-avatar flex items-center justify-center bg-[var(--accent-blue-100)] text-[var(--accent-blue-700)]">
+                                        <div className="profile-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--accent-blue-100)', color: 'var(--accent-blue-700)' }}>
                                             <User size={20} />
                                         </div>
                                     )}
-                                    <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
                                         {currentUser.displayName || 'Foydalanuvchi'}
                                     </span>
                                 </Link>
-                                <button onClick={() => { logout(); closeMobileMenu(); }} className="text-[var(--text-secondary)] hover:text-[var(--streak-color)] transition-colors" title="Log out">
+                                <button onClick={() => { logout(); closeMobileMenu(); }} className="logout-btn" title="Log out">
                                     <LogOut size={20} />
                                 </button>
                             </div>

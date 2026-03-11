@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { useTheme } from '../context/ThemeContext';
@@ -37,27 +37,27 @@ const Compiler = () => {
     const isDragging = useRef(false);
     const [leftPaneWidth, setLeftPaneWidth] = useState(50); // percentage
 
-    const handleMouseDown = (e) => {
-        isDragging.current = true;
-        document.body.style.cursor = 'col-resize';
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-    };
-
-    const handleMouseMove = (e) => {
+    const handleMouseMove = useCallback((e) => {
         if (!isDragging.current) return;
         const newWidth = (e.clientX / window.innerWidth) * 100;
-        if (newWidth > 15 && newWidth < 85) { // Constraints to prevent fully collapsing a pane
+        if (newWidth > 15 && newWidth < 85) {
             setLeftPaneWidth(newWidth);
         }
-    };
+    }, []);
 
-    const handleMouseUp = () => {
+    const handleMouseUp = useCallback(() => {
         isDragging.current = false;
         document.body.style.cursor = 'default';
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
-    };
+    }, [handleMouseMove]);
+
+    const handleMouseDown = useCallback((e) => {
+        isDragging.current = true;
+        document.body.style.cursor = 'col-resize';
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    }, [handleMouseMove, handleMouseUp]);
 
     const handleNewFile = () => {
         setCode('// Yangi fayl\n');
@@ -137,7 +137,7 @@ const Compiler = () => {
                     </div>
                 </div>
 
-                <div className="toolbar-center font-bold">
+                <div className="toolbar-center" style={{ fontWeight: 700 }}>
                     Men Dasturchi Bo'laman IDE
                 </div>
 
@@ -163,18 +163,19 @@ const Compiler = () => {
 
                     <Link
                         to="/ai"
-                        className="upload-btn all-btn-hover text-green-500 font-bold"
+                        className="upload-btn all-btn-hover"
                         title="AI Assistant"
-                        style={{ textDecoration: 'none' }}
+                        style={{ textDecoration: 'none', color: '#22c55e', fontWeight: 700 }}
                     >
-                        <Sparkles size={16} className="text-green-500" />
+                        <Sparkles size={16} style={{ color: '#22c55e' }} />
                         AI
                     </Link>
 
                     <select
                         value={language}
                         onChange={handleLanguageChange}
-                        className="lang-select all-btn-hover uppercase"
+                        className="lang-select all-btn-hover"
+                        style={{ textTransform: 'uppercase' }}
                     >
                         {Object.keys(LANGUAGE_VERSIONS).map((lang) => (
                             <option key={lang} value={lang}>
@@ -188,7 +189,7 @@ const Compiler = () => {
                         disabled={isLoading}
                         className="run-btn all-btn-hover"
                     >
-                        RUN {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} fill="white" />}
+                        RUN {isLoading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Play size={16} fill="white" />}
                     </button>
 
                 </div>
@@ -221,11 +222,11 @@ const Compiler = () => {
                 <div className="output-pane" style={{ width: `${100 - leftPaneWidth}%`, flex: 'none' }}>
                     {/* STDIN Input Form */}
                     <div className="pane-section">
-                        <div className="pane-header flex justify-between">
+                        <div className="pane-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
                             <span>STDIN</span>
-                            <span className="text-gray-400 capitalize normal-case">Input for the program (Optional)</span>
+                            <span style={{ color: 'var(--text-secondary)', textTransform: 'capitalize' }}>Input for the program (Optional)</span>
                         </div>
-                        <div className="pane-content bg-white dark:bg-[#1e1e1e]">
+                        <div className="pane-content">
                             <textarea
                                 value={stdin}
                                 onChange={(e) => setStdin(e.target.value)}
@@ -241,7 +242,7 @@ const Compiler = () => {
                         <div className="pane-header">
                             Output:
                         </div>
-                        <div className={`pane-content bg-white dark:bg-[#1e1e1e] whitespace-pre-wrap ${isError ? 'output-error' : output ? 'output-success' : 'text-[var(--text-secondary)]'}`}>
+                        <div className={`pane-content ${isError ? 'output-error' : output ? 'output-success' : ''}`} style={{ whiteSpace: 'pre-wrap' }}>
                             {output || "Men Dasturchi Bo'laman IDE-ga xush kelibsiz.\nNatijani ko'rish uchun RUN tugmasini bosing."}
                         </div>
                     </div>
