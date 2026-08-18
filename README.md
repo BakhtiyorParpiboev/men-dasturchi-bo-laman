@@ -1,5 +1,7 @@
 # 🚀 Men Dasturchi Bo'laman
 
+Websiteni Sinab Ko'ring: https://men-dasturchi-bolaman.vercel.app/
+
 O'zbek tilidagi zamonaviy dasturlash o'rganish platformasi — interaktiv darslar, AI yordamchi, dasturlash o'yinlari va onlayn kompilyator bilan.
 
 ![React](https://img.shields.io/badge/React-18-blue?logo=react)
